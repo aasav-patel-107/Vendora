@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Order Invoice</h2>
+  <hr>
+  <p><strong>Order ID:</strong> {{ order.id }}</p>
+  <p><strong>Date:</strong> {{ order.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+  <h4>Customer Info</h4>
+  <p>{{ customer.name }}</p>
+  <p>Email: {{ customer.email }}</p>
+
+  <h4>Shipping Address</h4>
+  <p>
+    {{ order.shipping_address.full_name }}<br>
+    {{ order.shipping_address.address_line }}, {{ order.shipping_address.city }}<br>
+    {{ order.shipping_address.state }} {{ order.shipping_address.zip }}, {{ order.shipping_address.country }}<br>
+    Phone: {{ order.shipping_address.phone }}
+  </p>
+
+  <h4>Order Items</h4>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ '%.2f' % item.price }}</td>
+        <td>${{ '%.2f' % (item.price * item.quantity) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+        <td><strong>${{ '%.2f' % order.total_amount }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+  
+  <a href="{{ url_for('download_invoice', order_id=order.id) }}" class="btn btn-primary">Download PDF</a>
+
+
+  <a href="{{ url_for('customer_dashboard') }}" class="btn btn-success">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}All Customers{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Registered Customers</h2>
+
+<form method="GET" class="row g-3 align-items-end mb-4">
+  <div class="col-md-4">
+    <label class="form-label">Search</label>
+    <input type="text" name="search" class="form-control" placeholder="Name or email" value="{{ search or '' }}">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Sort By</label>
+    <select name="sort_by" class="form-select">
+      <option value="">-- Select --</option>
+      <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+      <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+      <option value="email_asc" {% if sort_by == 'email_asc' %}selected{% endif %}>Email (A-Z)</option>
+      <option value="email_desc" {% if sort_by == 'email_desc' %}selected{% endif %}>Email (Z-A)</option>
+    </select>
+  </div>
+  <div class="col-md-4 d-flex gap-2">
+    <button type="submit" class="btn btn-primary mt-4">Apply</button>
+    <a href="{{ url_for('admin_all_customers') }}" class="btn btn-secondary mt-4">Reset</a>
+  </div>
+</form>
+
+
+<div class="card">
+  <div class="card-header bg-dark text-white">
+    Customer Accounts
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped m-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in customers %}
+          <tr>
+            <td>{{ customer.account.accountname }}</td>
+            <td>{{ customer.account.email }}</td>
+            <td>{{ customer.account.phone or '-' }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin_delete_customer', customer_id=customer.id) }}" onsubmit="return confirm('Delete this customer?');">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="text-center text-muted">No customers found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

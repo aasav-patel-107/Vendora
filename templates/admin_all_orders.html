@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}All Orders{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">All Orders</h2>
+
+<!-- Filter/Search Form -->
+<form method="GET" class="row g-3 align-items-end mb-4">
+  <div class="col-md-4">
+    <label class="form-label">Search by Customer</label>
+    <input type="text" name="search" class="form-control" placeholder="Name or email" value="{{ search or '' }}">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Filter by Status</label>
+    <select name="status" class="form-select">
+      <option value="">-- All --</option>
+      {% for s in ['Pending', 'Shipped', 'Cancelled', 'Delivered'] %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4 d-flex gap-2">
+    <button type="submit" class="btn btn-primary mt-4">Apply</button>
+    <a href="{{ url_for('admin_all_orders') }}" class="btn btn-secondary mt-4">Reset</a>
+  </div>
+</form>
+
+
+<div class="card">
+  <div class="card-header bg-dark text-white">
+    Orders Overview
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped m-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Items</th>
+          <th>Update Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>
+              <div><strong>{{ order.customer.account.accountname }}</strong></div>
+              <div class="text-muted">{{ order.customer.account.email }}</div>
+            </td>
+            <td>{{ order.date.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+              <span class="badge bg-info text-dark">{{ order.status }}</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#items-{{ order.id }}" aria-expanded="false" aria-controls="items-{{ order.id }}">
+                View Items
+              </button>
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('admin_update_order_status', order_id=order.id) }}" class="d-flex gap-2">
+                <select name="status" class="form-select form-select-sm">
+                  {% for s in ['Pending', 'Shipped', 'Cancelled', 'Delivered'] %}
+                    <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+              </form>
+            </td>
+          </tr>
+          <!-- Item details row -->
+          <tr class="collapse" id="items-{{ order.id }}">
+            <td colspan="6">
+              <div class="p-3 border rounded bg-light">
+                <strong>Order Items:</strong>
+                <table class="table table-bordered table-sm mt-2">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in order.items %}
+                      <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>${{ item.product.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ '%.2f' % (item.product.price * item.quantity) }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="text-center text-muted">No orders found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

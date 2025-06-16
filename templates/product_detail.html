@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+
+<!-- Cart Icon with Bubble -->
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('view_cart') }}" class="btn btn-outline-dark position-relative">
+        🛒
+        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ cart_count or 0 }}
+        </span>
+    </a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2>{{ product.name }}</h2>
+    <p>{{ product.description }}</p>
+    <p>💰 <strong>Price:</strong> ₹{{ product.price }}</p>
+
+   <div class="d-flex gap-2 mt-3">
+      <button id="add-to-cart-btn" class="btn btn-success">Add to Cart</button>
+
+      <form method="POST" action="{{ url_for('buy_now', product_id=product.id) }}">
+          <button class="btn btn-primary">Buy Now</button>
+      </form>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById('add-to-cart-btn').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    fetch('{{ url_for("add_to_cart", product_id=product.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.redirected) {
+            return fetch('/cart/count')
+                .then(res => res.json())
+                .then(data => {
+                    const bubble = document.getElementById('cart-count');
+                    if (bubble) bubble.textContent = data.count;
+                });
+        } else {
+            window.location.href = res.url;
+        }
+    });
+});
+</script>
+
+
+
+
+{% endblock %}

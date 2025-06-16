@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Your Cart{% endblock %}
+{% block content %}
+
+<!-- Cart Header with Icon and Notification Bubble -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Your Cart</h2>
+</div>
+
+<div id="cart-container">
+  {% if cart_items %}
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2" data-product-id="{{ item.product_id }}">
+                {% if item.quantity > 1 %}
+                  <button class="btn btn-sm btn-outline-secondary update-qty-btn" data-action="decrease" data-product-id="{{ item.product_id }}">-</button>
+                {% else %}
+                  <button class="btn btn-sm btn-outline-danger remove-btn" data-product-id="{{ item.product_id }}" title="Remove">🗑️</button>
+                {% endif %}
+                <span class="mx-2 fw-bold">{{ item.quantity }}</span>
+                <button class="btn btn-sm btn-outline-secondary update-qty-btn" data-action="increase" data-product-id="{{ item.product_id }}">+</button>
+              </div>
+            </td>
+            <td>₹{{ item.price * item.quantity }}</td>
+            <td>
+              <button class="btn btn-sm btn-danger remove-btn" data-product-id="{{ item.product_id }}">Remove</button>
+            </td>
+          </tr>
+        {% endfor %}
+        <tr class="table-light">
+          <td colspan="4" class="text-end fw-bold">Total:</td>
+          <td class="fw-bold text-success">₹{{ total_price }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline-primary">← Continue Shopping</a>
+      <div>
+        <h4 class="text-success mb-3">Total: ₹{{ total_price }}</h4>
+        <a href="{{ url_for('cart_checkout') }}" class="btn btn-success btn-lg">Proceed to Checkout</a>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <div class="mb-4">
+        <i class="fas fa-shopping-cart fa-5x text-muted"></i>
+      </div>
+      <h4 class="text-muted mb-3">Your cart is empty</h4>
+      <p class="text-muted mb-4">Add some products to get started!</p>
+      <a href="{{ url_for('customer_dashboard') }}" class="btn btn-primary">Start Shopping</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ✅ LIVE Update JavaScript -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cartCountBadge = document.getElementById("cart-count");
+
+    function bindCartEvents() {
+      const cartContainer = document.getElementById("cart-container");
+
+      cartContainer.addEventListener("click", function (e) {
+        const target = e.target;
+        const productId = target.dataset.productId;
+
+        if (target.classList.contains("update-qty-btn")) {
+          const action = target.dataset.action;
+          const formData = new FormData();
+          formData.append('action', action);
+
+          fetch(`/customer/cart/update/${productId}`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => updateCartDisplay(data))
+          .catch(err => console.error("Update failed:", err));
+        }
+
+        if (target.classList.contains("remove-btn")) {
+          fetch(`/customer/cart/remove/${productId}`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+          })
+          .then(res => res.json())
+          .then(data => updateCartDisplay(data))
+          .catch(err => console.error("Remove failed:", err));
+        }
+      });
+    }
+
+    function updateCartDisplay(data) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = data.updated_cart_html;
+      const newContent = tempDiv.querySelector("#cart-container");
+      if (newContent) {
+        const oldContainer = document.getElementById("cart-container");
+        oldContainer.replaceWith(newContent);
+        bindCartEvents();  // 🔁 Re-bind buttons
+      }
+
+      fetch('/cart/count')
+        .then(res => res.json())
+        .then(data => {
+          cartCountBadge.textContent = data.count || 0;
+        });
+    }
+
+    // Initial binding
+    bindCartEvents();
+  });
+</script>
+
+
+<!-- Optional Styling -->
+<style>
+  .cart-count-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quantity-display {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+  }
+</style>
+
+{% endblock %}

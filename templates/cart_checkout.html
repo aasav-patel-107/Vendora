@@ -1,0 +1,40 @@
+<!-- templates/cart_checkout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout - Confirm Order</title>
+</head>
+<body>
+    <h2>Confirm Your Order</h2>
+
+    <h3>Cart Items</h3>
+    {% if cart_items %}
+        <ul>
+            {% for item in cart_items %}
+                <li>{{ item.product_name }} - ₹{{ item.price }} x {{ item.quantity }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <h3>Select Shipping Address</h3>
+    <form method="POST">
+        <a href="{{ url_for('manage_addresses') }}" class="btn btn-secondary">
+            Manage Addresses
+        </a>
+
+        {% for address in addresses %}
+            <div>
+                <input type="radio" name="address_index" value="{{ loop.index0 }}" required>
+                {{ address.full_name }}, {{ address.address_line }}, {{ address.city }}, {{ address.state }} - {{ address.zip }}, {{ address.country }}<br>
+                Phone: {{ address.phone }}
+            </div>
+        {% else %}
+            <p>No saved addresses found. Please add one first.</p>
+        {% endfor %}
+        <button type="submit">Place Order</button>
+    </form>
+</body>
+</html>

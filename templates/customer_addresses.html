@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Manage Addresses{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">Your Addresses</h2>
+
+<!-- Add New Address -->
+<form method="POST" class="border rounded p-4 mb-5">
+  <h5>Add New Address</h5>
+  <input type="hidden" name="mode" value="add">
+  <div class="row g-2">
+    <div class="col-md-6">
+      <input required name="address_name" placeholder="Address Name (e.g., Home, Work)" class="form-control">
+    </div>
+    <div class="col-12">
+      <input required name="address_line" placeholder="Address Line" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <input required name="city" placeholder="City" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <input required name="state" placeholder="State" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <input required name="zip" placeholder="ZIP Code" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <input required name="country" placeholder="Country" class="form-control">
+    </div>
+    <div class="col-md-12 form-check mt-2">
+      <input type="checkbox" class="form-check-input" name="default" id="default">
+      <label for="default" class="form-check-label">Set as default</label>
+    </div>
+  </div>
+  <button class="btn btn-success mt-3">Add Address</button>
+</form>
+
+<!-- Existing Addresses -->
+{% for addr in addresses %}
+<div class="card mb-3 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{ addr.address_name }}
+      {% if addr.default %}
+        <span class="badge bg-success">Default</span>
+      {% endif %}
+    </h5>
+    <p class="mb-2">
+      {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} {{ addr.zip }}<br>
+      {{ addr.country }}
+    </p>
+
+    <!-- Edit Form -->
+    <form method="POST" class="row g-2 mb-2">
+      <input type="hidden" name="mode" value="edit">
+      <input type="hidden" name="index" value="{{ loop.index0 }}">
+      <div class="col-md-6">
+        <input required name="address_name" value="{{ addr.address_name }}" class="form-control">
+      </div>
+      <div class="col-12">
+        <input required name="address_line" value="{{ addr.address_line }}" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <input required name="city" value="{{ addr.city }}" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <input required name="state" value="{{ addr.state }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <input required name="zip" value="{{ addr.zip }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <input required name="country" value="{{ addr.country }}" class="form-control">
+      </div>
+      <div class="col-md-12 form-check mt-2">
+        <input type="checkbox" class="form-check-input" name="default" id="default{{ loop.index }}" {% if addr.default %}checked{% endif %}>
+        <label for="default{{ loop.index }}" class="form-check-label">Set as default</label>
+      </div>
+      <div class="col-12 d-flex gap-2 mt-2">
+        <button class="btn btn-primary btn-sm">Save Changes</button>
+      </div>
+    </form>
+    <form method="POST">
+      <input type="hidden" name="mode" value="delete">
+      <input type="hidden" name="index" value="{{ loop.index0 }}">
+      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+  </div>
+</div>
+{% else %}
+  <p class="text-muted">No addresses added yet.</p>
+{% endfor %}
+
+{% endblock %}

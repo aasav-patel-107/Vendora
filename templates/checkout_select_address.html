@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">Select Shipping Address</h2>
+
+<form method="POST">
+  {% if addresses %}
+    {% for addr in addresses %}
+      <div class="card mb-3 {% if addr.default %}border-success{% endif %}">
+        <div class="card-body">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="address_index" id="addr{{ loop.index0 }}" value="{{ loop.index0 }}" {% if addr.default %}checked{% endif %}>
+            <label class="form-check-label" for="addr{{ loop.index0 }}">
+              <strong>{{ addr.full_name }}</strong>
+              {% if addr.default %}<span class="badge bg-success">Default</span>{% endif %}<br>
+              {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - {{ addr.zip }}<br>
+              {{ addr.country }}<br>
+              📞 {{ addr.phone }}
+            </label>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">You don't have any addresses yet.</p>
+  {% endif %}
+
+  <button class="btn btn-primary mb-4" {% if not addresses %}disabled{% endif %}>Place Order</button>
+</form>
+
+<!-- Add New Address Inline -->
+<form method="POST" class="border rounded p-4 mb-5 bg-light">
+  <h5>Add New Address</h5>
+  <input type="hidden" name="add_address" value="1">
+  <div class="row g-2">
+    <div class="col-md-6"><input required name="full_name" placeholder="Full Name" class="form-control"></div>
+    <div class="col-md-6"><input required name="phone" placeholder="Phone Number" class="form-control"></div>
+    <div class="col-12"><input required name="address_line" placeholder="Address Line" class="form-control"></div>
+    <div class="col-md-4"><input required name="city" placeholder="City" class="form-control"></div>
+    <div class="col-md-4"><input required name="state" placeholder="State" class="form-control"></div>
+    <div class="col-md-2"><input required name="zip" placeholder="ZIP Code" class="form-control"></div>
+    <div class="col-md-2"><input required name="country" placeholder="Country" class="form-control"></div>
+    <div class="col-md-12 form-check mt-2">
+      <input type="checkbox" class="form-check-input" name="default" id="default">
+      <label for="default" class="form-check-label">Set as default</label>
+    </div>
+  </div>
+  <button class="btn btn-success mt-3">Add Address</button>
+</form>
+
+<a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+{% endblock %}
