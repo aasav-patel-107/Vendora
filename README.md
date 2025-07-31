@@ -1,6 +1,6 @@
 # Vendora
 
-Vendora is a role-based product management app built with Flask and PostgreSQL.  
+Vendora is a demo web for role-based product management app built with Flask and PostgreSQL.  
 Roles: Admin, Vendor, User
 
 ## Features
